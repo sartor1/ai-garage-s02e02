@@ -5,15 +5,10 @@ import { QRCodeCanvas } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { type Lang, translations } from "@/lib/i18n";
 
-const TABS = [
-  { id: "url", label: "Ссылка" },
-  { id: "text", label: "Текст" },
-  { id: "email", label: "Email" },
-  { id: "phone", label: "Телефон" },
-] as const;
-
-type TabId = (typeof TABS)[number]["id"];
+const TAB_IDS = ["url", "text", "email", "phone"] as const;
+type TabId = (typeof TAB_IDS)[number];
 
 function buildValue(tab: TabId, input: string): string {
   if (!input.trim()) return "";
@@ -29,18 +24,13 @@ function buildValue(tab: TabId, input: string): string {
   }
 }
 
-const PLACEHOLDERS: Record<TabId, string> = {
-  url: "example.com",
-  text: "Введите любой текст",
-  email: "name@example.com",
-  phone: "+7 900 000 00 00",
-};
-
 export default function Home() {
+  const [lang, setLang] = useState<Lang>("ru");
   const [tab, setTab] = useState<TabId>("url");
   const [input, setInput] = useState("");
   const canvasWrapRef = useRef<HTMLDivElement>(null);
 
+  const t = translations[lang];
   const value = buildValue(tab, input);
   const hasValue = value.length > 0;
 
@@ -63,7 +53,7 @@ export default function Home() {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="border-b border-border bg-card">
-        <div className="max-w-4xl mx-auto flex h-16 items-center px-6">
+        <div className="max-w-4xl mx-auto flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded bg-primary flex items-center justify-center">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -76,7 +66,27 @@ export default function Home() {
                 <rect x="13" y="13" width="2" height="2" fill="white"/>
               </svg>
             </div>
-            <span className="text-lg font-semibold tracking-tight text-foreground">QR Генератор</span>
+            <span className="text-lg font-semibold tracking-tight text-foreground">
+              {t.appName}
+            </span>
+          </div>
+
+          {/* Language switcher */}
+          <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+            {(["ru", "en"] as Lang[]).map((l) => (
+              <button
+                key={l}
+                onClick={() => setLang(l)}
+                className={[
+                  "px-3 py-1 text-sm font-medium rounded-md transition-colors",
+                  lang === l
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                ].join(" ")}
+              >
+                {l === "ru" ? "РУ" : "EN"}
+              </button>
+            ))}
           </div>
         </div>
       </header>
@@ -87,11 +97,9 @@ export default function Home() {
           {/* Title */}
           <div className="text-center mb-10">
             <h1 className="text-3xl font-semibold text-foreground mb-2">
-              Создайте QR-код
+              {t.title}
             </h1>
-            <p className="text-muted-foreground text-base">
-              Введите данные — код готов мгновенно
-            </p>
+            <p className="text-muted-foreground text-base">{t.subtitle}</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 items-start">
@@ -99,18 +107,18 @@ export default function Home() {
             <div className="space-y-5">
               {/* Tabs */}
               <div className="flex gap-1 bg-muted rounded-lg p-1">
-                {TABS.map((t) => (
+                {TAB_IDS.map((id) => (
                   <button
-                    key={t.id}
-                    onClick={() => handleTabChange(t.id)}
+                    key={id}
+                    onClick={() => handleTabChange(id)}
                     className={[
                       "flex-1 py-2 text-sm font-medium rounded-md transition-colors",
-                      tab === t.id
+                      tab === id
                         ? "bg-card text-foreground shadow-sm"
                         : "text-muted-foreground hover:text-foreground",
                     ].join(" ")}
                   >
-                    {t.label}
+                    {t.tabs[id]}
                   </button>
                 ))}
               </div>
@@ -118,15 +126,12 @@ export default function Home() {
               {/* Input */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  {tab === "url" && "Адрес страницы"}
-                  {tab === "text" && "Текст"}
-                  {tab === "email" && "Адрес электронной почты"}
-                  {tab === "phone" && "Номер телефона"}
+                  {t.labels[tab]}
                 </label>
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder={PLACEHOLDERS[tab]}
+                  placeholder={t.placeholders[tab]}
                   className="h-12 text-base bg-card"
                   type={tab === "email" ? "email" : tab === "phone" ? "tel" : "text"}
                 />
@@ -138,13 +143,13 @@ export default function Home() {
                 disabled={!hasValue}
                 className="w-full h-12 text-base font-medium"
               >
-                Скачать PNG
+                {t.download}
               </Button>
 
               {/* Hint */}
               {!hasValue && (
                 <p className="text-sm text-muted-foreground text-center">
-                  Начните вводить — QR-код появится справа
+                  {t.hint}
                 </p>
               )}
             </div>
@@ -175,7 +180,7 @@ export default function Home() {
                             <path d="M14 14h.01M18 14h.01M14 18h.01M18 18h.01M14 18v-4h4v4"/>
                           </svg>
                         </div>
-                        <p className="text-sm text-muted-foreground">QR-код появится здесь</p>
+                        <p className="text-sm text-muted-foreground">{t.emptyState}</p>
                       </div>
                     </div>
                   )}
@@ -184,7 +189,7 @@ export default function Home() {
 
               {hasValue && (
                 <p className="text-xs text-muted-foreground text-center">
-                  Нажмите «Скачать», чтобы сохранить изображение
+                  {t.downloadHint}
                 </p>
               )}
             </div>
@@ -194,9 +199,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-border py-5">
-        <p className="text-center text-sm text-muted-foreground">
-          Данные не передаются на сервер — всё работает в вашем браузере
-        </p>
+        <p className="text-center text-sm text-muted-foreground">{t.footer}</p>
       </footer>
     </div>
   );
