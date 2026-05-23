@@ -1,10 +1,10 @@
 import { auth } from "@clerk/nextjs/server"
 import { NextRequest, NextResponse } from "next/server"
-import { Polar } from "@polar-sh/sdk"
+import { Polar, ServerList } from "@polar-sh/sdk"
 
 const polar = new Polar({
   accessToken: process.env.POLAR_ACCESS_TOKEN!,
-  server: (process.env.POLAR_SERVER as "sandbox" | "production") ?? "production",
+  server: (process.env.POLAR_SERVER as keyof typeof ServerList) ?? "production",
 })
 
 export async function GET(req: NextRequest) {
