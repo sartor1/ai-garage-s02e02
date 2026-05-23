@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { type Lang, translations } from "@/lib/i18n";
+import { useUser } from "@clerk/nextjs";
 
 const TAB_IDS = ["url", "text", "email", "phone"] as const;
 type TabId = (typeof TAB_IDS)[number];
@@ -29,6 +30,7 @@ export default function Home() {
   const [tab, setTab] = useState<TabId>("url");
   const [input, setInput] = useState("");
   const canvasWrapRef = useRef<HTMLDivElement>(null);
+  const { isSignedIn } = useUser();
 
   const t = translations[lang];
   const value = buildValue(tab, input);
@@ -71,22 +73,32 @@ export default function Home() {
             </span>
           </div>
 
-          {/* Language switcher */}
-          <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
-            {(["ru", "en"] as Lang[]).map((l) => (
-              <button
-                key={l}
-                onClick={() => setLang(l)}
-                className={[
-                  "px-3 py-1 text-sm font-medium rounded-md transition-colors",
-                  lang === l
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                ].join(" ")}
-              >
-                {l === "ru" ? "РУ" : "EN"}
-              </button>
-            ))}
+          <div className="flex items-center gap-3">
+            {/* Upgrade / Portal button */}
+            <a
+              href={isSignedIn ? "/api/portal" : "/api/checkout"}
+              className="px-4 py-1.5 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              {isSignedIn ? t.portal : t.upgrade}
+            </a>
+
+            {/* Language switcher */}
+            <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+              {(["ru", "en"] as Lang[]).map((l) => (
+                <button
+                  key={l}
+                  onClick={() => setLang(l)}
+                  className={[
+                    "px-3 py-1 text-sm font-medium rounded-md transition-colors",
+                    lang === l
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  ].join(" ")}
+                >
+                  {l === "ru" ? "РУ" : "EN"}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </header>

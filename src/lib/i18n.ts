@@ -28,6 +28,8 @@ export const translations = {
     emptyState: "QR-код появится здесь",
     downloadHint: 'Нажмите «Скачать», чтобы сохранить изображение',
     footer: "Данные не передаются на сервер — всё работает в вашем браузере",
+    upgrade: "Купить",
+    portal: "Управление подпиской",
   },
   en: {
     appName: "QR Generator",
@@ -56,5 +58,7 @@ export const translations = {
     emptyState: "Your QR code will appear here",
     downloadHint: "Click Download to save the image",
     footer: "No data is sent to any server — everything runs in your browser",
+    upgrade: "Upgrade",
+    portal: "Manage subscription",
   },
 } as const satisfies Record<Lang, object>;
